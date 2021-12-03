@@ -22,11 +22,31 @@ def receberMensagem(cliente):
         try:
             mensagem = cliente.recv(1024).decode("utf-8")
             print(f"Cliente {apelidos[indexCliente]} enviou a mensagem ´{mensagem}´\r\n")
+
+            if ("SEND-CONEXAO-USUARIO:" in mensagem):
+                indexUsuarioAConectar = 0
+                nomeUsuarioAConectar = mensagem.split(":",1)[1]
+                for apelido in apelidos:
+                    if (apelido == nomeUsuarioAConectar):
+                        indexUsuarioAConectar = apelidos.index(apelido)
+                        break
+
+                if (indexUsuarioAConectar != 0):
+                    print(f"Enviando 'USER-FOUND' para o usuario {apelidos[indexCliente]}\r\n")
+                    cliente.send("USER-FOUND".encode("utf-8"))
+                    continue
+                else:
+                    print(f"Enviando 'USER-NOT-FOUND' para o usuario {apelidos[indexCliente]}\r\n")
+                    cliente.send("USER-NOT-FOUND".encode("utf-8"))
+                    continue
+
             fazerBroadcast(f"{apelidos[indexCliente]}: {mensagem}\r\n".encode("utf-8"))
-        except:
+        except Exception as e:
+            print(e)
             clientes.remove(cliente)
             cliente.close()
             apelido = apelidos[indexCliente]
+            print(f'{apelido} desconectado!')
             fazerBroadcast(f'{apelido} saiu da sala!'.encode('utf-8'))
             apelidos.remove(apelido)
             break

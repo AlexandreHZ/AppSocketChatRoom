@@ -10,14 +10,12 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect((host, porta))
 
 def mostrarMenuComandos():
-    print('\r\n1 - Conversar com alguem\r\n2 - Enviar algum comando para alguem\r\n3 - Voltar\r\n')
+    print('\r\n1 - Conversar com alguem\r\n2 - Voltar\r\n')
 
 def controlarInputMenuComandos(opcaoEscolhida):
     if (opcaoEscolhida == '1'):
-        pass
+        return input("\r\nApelido a procurar: ")
     elif (opcaoEscolhida == '2'):
-        pass
-    elif (opcaoEscolhida == '3'):
         return 'Voltar'
     else:
         retorno = 'Opcao invalida!'
@@ -30,7 +28,11 @@ def receberMsgServidor():
             mensagemRecebida = sock.recv(1024).decode('utf-8')
             if mensagemRecebida == 'APELIDO':
                 sock.send(apelido.encode('utf-8'))
-            else:
+            elif (mensagemRecebida == "USER-NOT-FOUND"):
+                print("Usuario nao encontrado.")
+            elif (mensagemRecebida == "USER-FOUND"):
+                print("Usuario encontrado")
+            elif (mensagemRecebida != ''):
                 print(mensagemRecebida)
         except Exception as e:
             print(f"Ops, parece que ocorreu algum problema :c ({e})\r\n")
@@ -40,12 +42,15 @@ def receberMsgServidor():
 def enviarMsg():
     while True:
         mensagem = input("")
-        if (mensagem == 'COMANDOS'):
+        if (mensagem == '/COMANDOS'):
             mostrarMenuComandos()
             opcaoEscolhida = input("")
             retorno = controlarInputMenuComandos(opcaoEscolhida)
 
-            if (retorno == 'Opcao invalida!' or 'Voltar'):
+            if (retorno == 'Opcao invalida!' or retorno == 'Voltar' or retorno == 'Usuario nao encontrado!'):
+                continue
+            else:
+                sock.send(("SEND-CONEXAO-USUARIO:"+retorno).encode('utf-8'))
                 continue
 
         sock.send(mensagem.encode('utf-8'))
