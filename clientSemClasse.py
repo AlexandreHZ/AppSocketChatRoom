@@ -29,9 +29,12 @@ def receberMsgServidor():
             if mensagemRecebida == 'APELIDO':
                 sock.send(apelido.encode('utf-8'))
             elif (mensagemRecebida == "USER-NOT-FOUND"):
-                print("Usuario nao encontrado.")
-            elif (mensagemRecebida == "USER-FOUND"):
-                print("Usuario encontrado")
+                print("Usuario nao encontrado!")
+            elif ("USER-FOUND" in mensagemRecebida):
+                index =  mensagemRecebida.split(":",1)[1]
+                print(f"Usuario encontrado!")
+                msgEnviar = input("Digite sua mensagem: ")
+                sock.send(f"MENSAGEM-A-USUARIO:{index}:{msgEnviar}".encode('utf-8'))
             elif (mensagemRecebida != ''):
                 print(mensagemRecebida)
         except Exception as e:
@@ -47,7 +50,7 @@ def enviarMsg():
             opcaoEscolhida = input("")
             retorno = controlarInputMenuComandos(opcaoEscolhida)
 
-            if (retorno == 'Opcao invalida!' or retorno == 'Voltar' or retorno == 'Usuario nao encontrado!'):
+            if (retorno == 'Opcao invalida!' or retorno == 'Voltar'):
                 continue
             else:
                 sock.send(("SEND-CONEXAO-USUARIO:"+retorno).encode('utf-8'))

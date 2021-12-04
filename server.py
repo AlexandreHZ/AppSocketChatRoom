@@ -16,6 +16,9 @@ def fazerBroadcast(mensagem):
     for cliente in clientes:
         cliente.send(mensagem)
 
+def enviarMsgACliente(mensagem, indexCliente):
+    clientes[indexCliente].send(mensagem)
+
 def receberMensagem(cliente):
     while True:
         indexCliente = clientes.index(cliente)
@@ -24,21 +27,24 @@ def receberMensagem(cliente):
             print(f"Cliente {apelidos[indexCliente]} enviou a mensagem ´{mensagem}´\r\n")
 
             if ("SEND-CONEXAO-USUARIO:" in mensagem):
-                indexUsuarioAConectar = 0
+                indexClienteAConectar = 99999
                 nomeUsuarioAConectar = mensagem.split(":",1)[1]
                 for apelido in apelidos:
                     if (apelido == nomeUsuarioAConectar):
                         indexUsuarioAConectar = apelidos.index(apelido)
                         break
 
-                if (indexUsuarioAConectar != 0):
-                    print(f"Enviando 'USER-FOUND' para o usuario {apelidos[indexCliente]}\r\n")
-                    cliente.send("USER-FOUND".encode("utf-8"))
-                    continue
+                if (indexUsuarioAConectar != 99999):
+                    cliente.send(f"USER-FOUND:{indexUsuarioAConectar}".encode("utf-8"))
                 else:
-                    print(f"Enviando 'USER-NOT-FOUND' para o usuario {apelidos[indexCliente]}\r\n")
                     cliente.send("USER-NOT-FOUND".encode("utf-8"))
-                    continue
+                continue
+
+            if ("MENSAGEM-A-USUARIO:" in mensagem):
+                indexClienteAConectar = int(mensagem.split(":")[1])
+                msgEnviarACliente = mensagem.split(":")[2]
+                enviarMsgACliente((f"{apelidos[indexCliente]} por mensagem privada:{msgEnviarACliente}\r\n").encode("utf-8"), indexClienteAConectar)
+                continue
 
             fazerBroadcast(f"{apelidos[indexCliente]}: {mensagem}\r\n".encode("utf-8"))
         except Exception as e:
