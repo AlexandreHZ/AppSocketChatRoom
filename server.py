@@ -28,21 +28,30 @@ def receberMensagem(cliente):
 
             if ("SEND-CONEXAO-USUARIO:" in mensagem):
                 indexClienteAConectar = 99999
-                nomeUsuarioAConectar = mensagem.split(":",1)[1]
+                msgDividida = mensagem.split(":")
+
+                if (len(msgDividida) <= 1):
+                    continue
+
+                nomeUsuarioAConectar = msgDividida[1]
                 for apelido in apelidos:
                     if (apelido == nomeUsuarioAConectar):
-                        indexUsuarioAConectar = apelidos.index(apelido)
+                        indexClienteAConectar = apelidos.index(apelido)
                         break
 
-                if (indexUsuarioAConectar != 99999):
-                    cliente.send(f"USER-FOUND:{indexUsuarioAConectar}".encode("utf-8"))
+                if (indexClienteAConectar != 99999):
+                    cliente.send(f"USER-FOUND:{indexClienteAConectar}".encode("utf-8"))
                 else:
                     cliente.send("USER-NOT-FOUND".encode("utf-8"))
                 continue
 
             if ("MENSAGEM-A-USUARIO:" in mensagem):
-                indexClienteAConectar = int(mensagem.split(":")[1])
-                msgEnviarACliente = mensagem.split(":")[2]
+                msgDividida = mensagem.split(":")
+                if (len(msgDividida) <= 1):
+                    continue
+
+                indexClienteAConectar = int(msgDividida[1])
+                msgEnviarACliente = msgDividida[2]
                 enviarMsgACliente((f"{apelidos[indexCliente]} por mensagem privada:{msgEnviarACliente}\r\n").encode("utf-8"), indexClienteAConectar)
                 continue
 
